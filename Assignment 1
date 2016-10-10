@@ -1,0 +1,61 @@
+######################################################################
+# File name: sarah_gibbons_asm2.asm
+# Author: Sarah Gibbons
+# Assignment # : 1
+# Date: 
+# Functional description:
+# 1. ble Rs, Rt, Label
+# --> Branch on less than or equal;
+# If (𝑅𝑠 ≤ 𝑅𝑡) then branch to label
+# 2. abs Rd, Rs
+# --> Absolute;
+# Rd = absolute-value (Rs)
+# 3. slei Rd, Rs, Constant
+#--> Set less than or equal immediate;
+# If (𝑅𝑠 ≤ 𝐶𝑜𝑛𝑠𝑡𝑎𝑛𝑡) then 𝑅𝑑 = 1, else 𝑅𝑑 = 0.
+# 4. bgeo Rs, Label
+# --> Brunch on greater than or equal to one;
+#If (𝑅𝑠 ≥ 1) then branch to label
+# 5. lwd Offset(Rt)
+# --> Load a double word (64 bits) from M[Offset+Rt].
+# The word is loaded into registers Hi and Lo with the most
+# significant part in register Hi and the least significant part in
+# register lo.
+######################################################################
+1.
+slt $at, $Rd, $Rs
+beq $at,$0, label 
+
+2. 
+abs $Rd, $Rs
+or $Rd, $Rs, $zero
+bgez $Rd, _exit10
+sub $Rd, $zero, $Rd
+_exit10:
+
+3.
+
+slti $at, $Rs, constant
+bne $at, $0, _if1
+addi $at, $0, constant
+beq $Rs, $at, _if1
+add $Rd, $0, $0
+beq $0, $0, _exit10
+
+_if1: addi $Rd, $0, 1
+
+_exit10:
+
+4. 
+bgeo $Rs, label
+ori $Rt, $zero, 1
+slt $at, $Rt, $Rs
+bne $at, $zero, label
+beq $Rs, $Rt, label
+
+
+5.
+lw $1, offset($Rt)
+mthi $1
+lw $1, [offset+4]($Rt)
+mtlow $1
