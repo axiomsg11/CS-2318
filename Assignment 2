@@ -1,0 +1,96 @@
+######################################################################
+# File name: sarah_gibbons_asm2.asm
+# Author: Sarah Gibbons
+# Assignment # : 2
+# Date: 10/7/16
+# Functional description:
+# following are detailed instructions:
+# 1) The program generates a static array with 10 integers
+#    (using the .word directive).
+# 2) The program prompts the user to enter 1 if she/he wants to find
+#    the minimal value stored in the array, and 2 if he/she wants
+#    the maximal value stored.
+# 3) If the user enters 1, then the program finds the minimal value
+#    stored in the array and prints out this value.
+# 4) If the user enters 2, then the program finds the maximal value
+#    stored in the array and prints out this value.
+# 5) If the user enters any other value, then the program prompts the
+#    user again to enter a valid number.
+# 6) After displaying the min (or max), the program terminates.
+######################################################################
+			.data
+promptStr:		.asciiz "Please enter 1 for minimum value or 2 for maximum value: ";
+list:			.word 10, 11, 2, 35, 4, 85, 6, 7, 8, 9
+			.text
+ 			## .global main
+main:
+######################################################################
+## register assignments:
+######################################################################
+## $t0: temp holder (primary)
+## $t1: count down to
+## $t2: count down from
+## $t3: smallest
+## $t4: temporary value holder
+## $t6: address of array elements
+## $v0: temporary value holder
+######################################################################
+
+top:
+#   cout << "please enter 1 for minimum value or 2 for maximum value: ";
+			li $v0, 4
+			la $a0, promptStr
+			syscall
+#   cin >> v0;
+			li $v0, 5
+			syscall
+#   int t0 = v0;
+			addi $t0, $v0, 0 # Move user choice to $t0
+			blez $t0, top	 # Input <= 0 is invalid
+#   switch(t0){
+			addi $t5, $0, 1	      # Skip jump instruction if
+			bne $t0, $t5, c2_cond # $t5 != 1, else jump to
+			j c1_body 	      # c1_body
+c2_cond:
+			addi $t5, $0, 2	      # If $t5=2, goto c2_body
+			beq $t0, $t5, c2_body # else start over
+			j top
+c1_body:
+#    case 1:{
+
+			li $t1, 0      # $t1: count to 0
+			li $t2, 10     # $t2: count from 10
+			la $t6, list   # $t6 has address of 1st element
+			lw $t3, 0($t6) # $t3 has 1st ("smallest") integer
+
+W1:			lw $t4, 0($t6) # $t4 has integer from 0($t6)
+			beq $t2, $t1, exit_10 # exit if $t2 <= $t1 (done counting)
+
+			bgt $t4, $t3, I1 # If $t4 > $t3 skip to I1
+			addi $t3, $t4, 0 # else set $t3 <- $t4
+I1:
+			addi $t2, $t2, -1 # Decrement counter
+			addi $t6, $t6, 4  # Increment pointer in $t6
+			j W1
+
+c2_body:
+			li $t1, 0      # $t1: count to 0
+			li $t2, 10     # $t2: count from 10
+			la $t6, list   # $t6 has address of 1st element
+			lw $t3, 0($t6) # $t3 has 1st ("biggest") integer
+
+W2:			lw $t4, 0($t6) # $t4 has integer from 0($t6)
+			beq $t2, $t1, exit_10 # exit if done counting
+
+			bgt $t3, $t4, I3 # if $t4 > $t3 skip to I3
+			addi $t3, $t4, 0 # else set $t3 <- $t4
+I3:
+			addi $t2, $t2, -1   # decrement counter
+			addi $t6, $t6, 4    # increment curent array element pointer in $t6
+			j W2
+exit_10:
+			li $v0, 1
+			addi $a0, $t3, 0
+			syscall
+			li $v0, 10
+			syscall
